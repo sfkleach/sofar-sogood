@@ -25,11 +25,11 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols
 
-      - name: Vet
-        run: go vet ./...
+      - uses: extractions/setup-just@v3
+
+      # Runs the unit tests, go vet, golangci-lint and the gofmt check.
+      - name: Test
+        run: just test
 
       - name: Build
         run: go build -o sofar-sogood-ci .
-
-      - name: Test
-        run: go test ./...

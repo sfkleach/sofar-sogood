@@ -5,6 +5,13 @@ Following the style in https://keepachangelog.com/en/1.0.0/
 Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top section must be a release heading, not
 `Unreleased`, before a tag is pushed; `just shippable` checks this.
 
+## Unreleased
+
+### Added
+
+- `just test` runs the unit tests, `go vet`, golangci-lint and a gofmt check (without reformatting), and CI uses it.
+- `just install-deps` installs golangci-lint v2 if it is missing.
+
 ## v0.1.0, First release 2026-10-01
 
 ### Added

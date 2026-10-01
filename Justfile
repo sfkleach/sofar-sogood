@@ -1,3 +1,5 @@
+set windows-shell := ["bash", "-uc"]
+
 # Fyne's OpenGL bindings need cgo (and so a C compiler)
 export CGO_ENABLED := "1"
 
@@ -17,9 +19,50 @@ run config="": build
     ./sofar-sogood {{ if config != "" { "-config " + config } else { "" } }}
 
 # Run the unit tests
-test:
+unittest:
     go test -cover ./...
     @echo
+
+# Run go vet
+vet:
+    go vet ./...
+
+# Install the tools needed by the other recipes, if they are missing
+install-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="$(go env GOPATH)/bin:$PATH"
+    # Install if missing, or if an older (v1) major version is installed.
+    if ! command -v golangci-lint >/dev/null 2>&1 || ! golangci-lint --version | grep -Eq 'version v?2\.'; then
+        echo "Installing golangci-lint..."
+        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+    fi
+
+# Run the linter
+lint: install-deps
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # The installer puts golangci-lint in GOPATH/bin, which may not be on the PATH.
+    export PATH="$(go env GOPATH)/bin:$PATH"
+    golangci-lint run ./...
+
+# Check the formatting without changing any files; use "just fmt" to fix it
+fmt-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    unformatted=$(gofmt -l .)
+    if [ -n "$unformatted" ]; then
+        echo "These files are not gofmt-formatted:" >&2
+        echo "$unformatted" >&2
+        exit 1
+    fi
+
+# Reformat all Go files in place
+fmt:
+    gofmt -w .
+
+# Run all the checks: unit tests, vet, linter and formatting
+test: unittest vet lint fmt-check
 
 # Generate a coverage report for the unit tests
 test-coverage:
