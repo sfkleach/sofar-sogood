@@ -49,9 +49,33 @@ func main() {
 		w.Resize(fyne.NewSize(w.Content().MinSize().Width, w.Content().MinSize().Height))
 	}
 
+	info := widget.NewLabel(fmt.Sprintf(
+		"So far, so good helps you track AI credit usage against a budget.\n\n"+
+			"Each budget shows how much you should have used by the close of play "+
+			"today, spreading the renewal amount evenly over the working days "+
+			"of the period.\n\n"+
+			"Budgets are defined in this config file:\n%s\n\n"+
+			"(Pass -config <path> to use a different file.)", *path))
+	info.Wrapping = fyne.TextWrapWord
+
+	showingInfo := false
+	var infoBtn *widget.Button
+	body := container.NewStack(lines)
+	infoBtn = widget.NewButton("Info", func() {
+		showingInfo = !showingInfo
+		if showingInfo {
+			body.Objects = []fyne.CanvasObject{info}
+			infoBtn.SetText("Back")
+		} else {
+			body.Objects = []fyne.CanvasObject{lines}
+			infoBtn.SetText("Info")
+		}
+		body.Refresh()
+		w.Resize(fyne.NewSize(max(w.Content().MinSize().Width, 360), w.Content().MinSize().Height))
+	})
 	refresh := widget.NewButton("Refresh", render)
 	dismiss := widget.NewButton("Dismiss", a.Quit)
-	w.SetContent(container.NewVBox(lines, container.NewGridWithColumns(2, refresh, dismiss)))
+	w.SetContent(container.NewVBox(body, container.NewGridWithColumns(3, refresh, infoBtn, dismiss)))
 	render()
 	w.SetFixedSize(false)
 	w.ShowAndRun()
