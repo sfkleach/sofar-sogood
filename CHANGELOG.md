@@ -5,7 +5,7 @@ Following the style in https://keepachangelog.com/en/1.0.0/
 Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top section must be a release heading, not
 `Unreleased`, before a tag is pushed; `just shippable` checks this.
 
-## Unreleased
+## v0.1.0, First release 2026-10-01
 
 ### Added
 
