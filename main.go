@@ -55,6 +55,8 @@ func main() {
 			"today, spreading the renewal amount evenly over the working days "+
 			"of the period.\n\n"+
 			"Budgets are defined in this config file:\n%s\n\n"+
+			"Each amount is a number with an optional symbol or unit, "+
+			"such as \"$200\", \"£1,000\" or \"800 credits\".\n\n"+
 			"(Pass -config <path> to use a different file.)", *path))
 	info.Wrapping = fyne.TextWrapWord
 
