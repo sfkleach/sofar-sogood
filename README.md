@@ -12,3 +12,5 @@ The config file lives in your user config directory, for example `~/.config/sofa
 anywhere you like via `-config`. See [examples/budgets.yaml](examples/budgets.yaml) and
 [docs/specs/amount-format.md](docs/specs/amount-format.md). To build it you need Go and a C compiler (it uses
 [Fyne](https://fyne.io)); run `just build`, or `just run examples/budgets.yaml` to try it out.
+
+To install the latest release on Linux or macOS, run `curl -fsSL https://raw.githubusercontent.com/sfkleach/sofar-sogood/main/install.sh | bash`.

@@ -46,6 +46,14 @@ clean:
     rm -f sofar-sogood
     rm -rf _build
 
+# Initialize decision records
+init-decisions:
+    python3 scripts/decisions.py --init
+
+# Add a new decision record
+add-decision TOPIC:
+    python3 scripts/decisions.py --add "{{TOPIC}}"
+
 # Check that the top CHANGELOG section is a release, not "Unreleased".
 shippable:
     python3 scripts/check-changelog.py

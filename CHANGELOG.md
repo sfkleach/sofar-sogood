@@ -16,3 +16,6 @@ Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top sect
 - Refresh, Info and Dismiss buttons. The Info pane explains the widget and shows the config file location and version.
 - `-config` and `-version` command-line flags.
 - GitHub workflows for build-and-test on Linux, macOS and Windows, and for building releases from `vX.Y.Z` tags.
+- `install.sh` to install the latest release on Linux and macOS (and from a Windows bash shell).
+- Linux arm64 release builds, and release notes covering the Windows Defender and macOS Gatekeeper caveats.
+- Decision records under `docs/decisions/`, with `just add-decision`.
