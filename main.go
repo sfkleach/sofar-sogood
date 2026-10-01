@@ -27,12 +27,12 @@ func main() {
 		fmt.Println(version)
 		return
 	}
+	defaultPath, err := budget.DefaultPath()
+	if err != nil && *path == "" {
+		log.Fatal(err)
+	}
 	if *path == "" {
-		p, err := budget.DefaultPath()
-		if err != nil {
-			log.Fatal(err)
-		}
-		*path = p
+		*path = defaultPath
 	}
 
 	a := app.New()
@@ -57,16 +57,22 @@ func main() {
 		w.Resize(fyne.NewSize(w.Content().MinSize().Width, w.Content().MinSize().Height))
 	}
 
+	// The default location is only worth mentioning if the file in use is somewhere else.
+	defaultNote := ""
+	if defaultPath != "" && !budget.SameFolder(*path, defaultPath) {
+		defaultNote = fmt.Sprintf("The default config file is:\n%s\n\n", defaultPath)
+	}
 	info := widget.NewLabel(fmt.Sprintf(
 		"So far, so good helps you track AI credit usage against a budget.\n\n"+
 			"Each budget shows how much you should have used by the close of play "+
 			"today, spreading the renewal amount evenly over the working days "+
 			"of the period.\n\n"+
 			"Budgets are defined in this config file:\n%s\n\n"+
+			"%s"+
 			"Each amount is a number with an optional symbol or unit, "+
 			"such as \"$200\", \"£1,000\" or \"800 credits\".\n\n"+
 			"(Pass -config <path> to use a different file.)\n\n"+
-			"Version: %s", *path, version))
+			"Version: %s", *path, defaultNote, version))
 	info.Wrapping = fyne.TextWrapWord
 
 	showingInfo := false

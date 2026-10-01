@@ -33,6 +33,19 @@ func DefaultPath() (string, error) {
 	return filepath.Join(dir, "sofar-sogood", "budgets.yaml"), nil
 }
 
+// SameFolder reports whether two file paths are in the same folder.
+func SameFolder(a, b string) bool {
+	dir := func(p string) string {
+		// Fall back to the cleaned path if it cannot be made absolute, which only
+		// happens when the working directory is unavailable.
+		if abs, err := filepath.Abs(p); err == nil {
+			p = abs
+		}
+		return filepath.Dir(p)
+	}
+	return dir(a) == dir(b)
+}
+
 // Load reads and validates the configuration file. A missing file is
 // treated as an empty list of budgets.
 func Load(path string) ([]Budget, error) {

@@ -108,3 +108,12 @@ func TestParseErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestSameFolder(t *testing.T) {
+	if !SameFolder("/a/b/budgets.yaml", "/a/b/../b/other.yaml") {
+		t.Error("expected the same folder")
+	}
+	if SameFolder("/a/b/budgets.yaml", "/a/c/budgets.yaml") {
+		t.Error("expected different folders")
+	}
+}
