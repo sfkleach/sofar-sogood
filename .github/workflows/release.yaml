@@ -1,0 +1,95 @@
+name: Release
+
+# Tags must be semantic versions such as v1.2.3 or v1.2.3-rc.1.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions:
+  contents: write
+
+jobs:
+  check-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the tag is a semantic version
+        run: |
+          if ! echo "$GITHUB_REF_NAME" | grep -Eq '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "Tag $GITHUB_REF_NAME is not a semantic version such as v1.2.3" >&2
+            exit 1
+          fi
+
+  build:
+    needs: check-tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, name: linux-amd64, ext: "" }
+          - { os: macos-latest, name: macos-arm64, ext: "" }
+          - { os: macos-15-intel, name: macos-amd64, ext: "" }
+          - { os: windows-latest, name: windows-amd64, ext: ".exe" }
+    runs-on: ${{ matrix.os }}
+    env:
+      CGO_ENABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Fyne's OpenGL and windowing bindings need these headers on Linux.
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev
+
+      - name: Test
+        run: go test ./...
+
+      # The windowsgui linker flag stops a console window opening alongside the widget.
+      - name: Build
+        shell: bash
+        run: |
+          flags="-s -w -X main.version=${GITHUB_REF_NAME}"
+          if [ "${{ runner.os }}" = "Windows" ]; then flags="$flags -H=windowsgui"; fi
+          go build -ldflags "$flags" -o "sofar-sogood${{ matrix.ext }}" .
+
+      - name: Package
+        shell: bash
+        run: |
+          base="sofar-sogood_${GITHUB_REF_NAME}_${{ matrix.name }}"
+          mkdir "$base"
+          cp "sofar-sogood${{ matrix.ext }}" README.md LICENSE examples/budgets.yaml "$base/"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "$base.zip" "$base"
+            echo "ASSET=$base.zip" >> "$GITHUB_ENV"
+          else
+            tar czf "$base.tar.gz" "$base"
+            echo "ASSET=$base.tar.gz" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ env.ASSET }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      # Tags with a prerelease suffix, such as v1.2.3-rc.1, are marked as prereleases.
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pre=""
+          case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" --generate-notes $pre

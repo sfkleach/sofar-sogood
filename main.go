@@ -16,9 +16,17 @@ import (
 	"github.com/sfkleach/sofar-sogood/budget"
 )
 
+// version is set at build time with -ldflags "-X main.version=v1.2.3".
+var version = "dev"
+
 func main() {
 	path := flag.String("config", "", "path to budgets.yaml (default: user config dir)")
+	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(version)
+		return
+	}
 	if *path == "" {
 		p, err := budget.DefaultPath()
 		if err != nil {
@@ -57,7 +65,8 @@ func main() {
 			"Budgets are defined in this config file:\n%s\n\n"+
 			"Each amount is a number with an optional symbol or unit, "+
 			"such as \"$200\", \"£1,000\" or \"800 credits\".\n\n"+
-			"(Pass -config <path> to use a different file.)", *path))
+			"(Pass -config <path> to use a different file.)\n\n"+
+			"Version: %s", *path, version))
 	info.Wrapping = fyne.TextWrapWord
 
 	showingInfo := false
