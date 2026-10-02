@@ -67,7 +67,7 @@ jobs:
         run: |
           base="sofar-sogood_${GITHUB_REF_NAME}_${{ matrix.name }}"
           mkdir "$base"
-          cp "sofar-sogood${{ matrix.ext }}" README.md LICENSE examples/budgets.yaml "$base/"
+          cp "sofar-sogood${{ matrix.ext }}" README.md LICENSE examples/budgets.toml "$base/"
           if [ "${{ runner.os }}" = "Windows" ]; then
             7z a "$base.zip" "$base"
             echo "ASSET=$base.zip" >> "$GITHUB_ENV"

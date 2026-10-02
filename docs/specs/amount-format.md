@@ -30,7 +30,8 @@ a unit after it. It is parsed by `ParseAmount` in `budget/budget.go`.
 The prefix or suffix is reused when showing estimates, so `$200` is displayed as `$66.67 of $200` and
 `800 credits` as `266.67 credits of 800 credits`. Values are rounded to two decimal places for display.
 
-## Recommendation
+## In the config file
 
-Quote the value in the YAML file, for example `amount: "$200"`, so that values such as `1,250` or
-`5e3` are not interpreted by YAML before they reach the parser.
+The config file is TOML, in which a symbol or unit makes the value text, so it must be quoted:
+`amount = "$200"` or `amount = "800 credits"`. A bare number with no symbol or unit is also accepted, for example
+`amount = 800`. The Python script `sofar_sogood.py` follows the same rules.

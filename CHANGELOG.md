@@ -9,7 +9,7 @@ Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top sect
 
 ### Added
 
-- Desktop widget (Fyne) showing, for each budget in a YAML config file, how much should have been spent by the close
+- Desktop widget (Fyne) showing, for each budget in a TOML config file, how much should have been spent by the close
   of play today, based on the working days of the renewal period so far.
 - Weekly, monthly, quarterly and annual renewal periods, with configurable working days (default Monday to Friday).
 - Amounts with a currency symbol or unit, such as `$200`, `£1,000` or `800 credits`; see `docs/specs/amount-format.md`.
@@ -22,4 +22,6 @@ Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top sect
 - `install.sh` to install the latest release on Linux and macOS (and from a Windows bash shell).
 - `just test` runs the unit tests, `go vet`, golangci-lint and a gofmt check (without reformatting), and CI uses it.
   `just install-deps` installs golangci-lint v2 if it is missing.
+- `sofar_sogood.py`, a console report that needs only the Python standard library (Python 3.11 or later), for machines
+  where the widget cannot run, such as those without OpenGL.
 - Decision records under `docs/decisions/`, with `just add-decision`.

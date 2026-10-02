@@ -14,7 +14,7 @@ default:
 build:
     go build -ldflags "-X main.version={{ version }}" -o sofar-sogood .
 
-# Build and run, optionally with a config file: just run examples/budgets.yaml
+# Build and run, optionally with a config file: just run examples/budgets.toml
 run config="": build
     ./sofar-sogood {{ if config != "" { "-config " + config } else { "" } }}
 

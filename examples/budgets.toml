@@ -1,0 +1,15 @@
+# Copy to your user config dir, e.g.
+#   macOS:   ~/Library/Application Support/sofar-sogood/budgets.toml
+#   Linux:   ~/.config/sofar-sogood/budgets.toml
+#   Windows: %AppData%\sofar-sogood\budgets.toml
+
+[[budgets]]
+title = "Claude credits"
+period = "monthly"          # weekly | monthly | quarterly | annual
+amount = "800 credits"      # "$200", "£1,000", "800 credits" ... always quoted
+
+[[budgets]]
+title = "Cloud spend"
+period = "annual"
+days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]   # defaults to Mon-Fri
+amount = "$2400"

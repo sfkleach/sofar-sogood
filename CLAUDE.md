@@ -1,7 +1,7 @@
 # So far, so good
 
 So far, so good is a small Go desktop widget, built with Fyne, that helps you
-track AI credit usage against a budget. For each budget defined in a YAML config
+track AI credit usage against a budget. For each budget defined in a TOML config
 file, it shows how much should have been spent by the close of play today,
 spreading the renewal amount evenly over the working days of the period.
 

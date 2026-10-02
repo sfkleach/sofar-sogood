@@ -20,7 +20,7 @@ import (
 var version = "dev"
 
 func main() {
-	path := flag.String("config", "", "path to budgets.yaml (default: user config dir)")
+	path := flag.String("config", "", "path to budgets.toml (default: user config dir)")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
 	if *showVersion {

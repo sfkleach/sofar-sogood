@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/BurntSushi/toml"
 )
 
 type fileFormat struct {
 	Budgets []struct {
-		Title  string   `yaml:"title"`
-		Period string   `yaml:"period"`
-		Days   []string `yaml:"days"`
-		Amount string   `yaml:"amount"`
-	} `yaml:"budgets"`
+		Title  string   `toml:"title"`
+		Period string   `toml:"period"`
+		Days   []string `toml:"days"`
+		// Amount is usually a string such as "$200", but a bare TOML number is accepted too.
+		Amount any `toml:"amount"`
+	} `toml:"budgets"`
 }
 
 var dayNames = map[string]time.Weekday{
@@ -30,7 +32,7 @@ func DefaultPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "sofar-sogood", "budgets.yaml"), nil
+	return filepath.Join(dir, "sofar-sogood", "budgets.toml"), nil
 }
 
 // SameFolder reports whether two file paths are in the same folder.
@@ -62,8 +64,13 @@ func Load(path string) ([]Budget, error) {
 // Parse validates configuration file contents.
 func Parse(data []byte) ([]Budget, error) {
 	var f fileFormat
-	if err := yaml.Unmarshal(data, &f); err != nil {
+	md, err := toml.Decode(string(data), &f)
+	if err != nil {
 		return nil, err
+	}
+	// Reject unknown keys so that a typo such as "perod" is reported instead of silently ignored.
+	if undecoded := md.Undecoded(); len(undecoded) > 0 {
+		return nil, fmt.Errorf("unknown key %q", undecoded[0].String())
 	}
 	var out []Budget
 	for i, raw := range f.Budgets {
@@ -77,7 +84,7 @@ func Parse(data []byte) ([]Budget, error) {
 		default:
 			return nil, fmt.Errorf("%s: period must be weekly, monthly, quarterly or annual", where)
 		}
-		amt, err := ParseAmount(raw.Amount)
+		amt, err := amountFromConfig(raw.Amount)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", where, err)
 		}
@@ -100,4 +107,20 @@ func Parse(data []byte) ([]Budget, error) {
 		out = append(out, Budget{Title: raw.Title, Period: period, Days: days, Amount: amt})
 	}
 	return out, nil
+}
+
+// amountFromConfig converts the decoded TOML value of the amount key.
+func amountFromConfig(v any) (Amount, error) {
+	switch v := v.(type) {
+	case string:
+		return ParseAmount(v)
+	case int64:
+		return ParseAmount(strconv.FormatInt(v, 10))
+	case float64:
+		return ParseAmount(strconv.FormatFloat(v, 'f', -1, 64))
+	case nil:
+		return Amount{}, fmt.Errorf("missing amount")
+	default:
+		return Amount{}, fmt.Errorf("amount must be a string or a number")
+	}
 }

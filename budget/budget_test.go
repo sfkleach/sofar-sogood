@@ -47,8 +47,11 @@ func TestFormat(t *testing.T) {
 }
 
 func TestEstimateWeekly(t *testing.T) {
-	bs, err := Parse([]byte(`budgets:
-  - {title: Lunch, period: weekly, amount: "$100"}`))
+	bs, err := Parse([]byte(`[[budgets]]
+title = "Lunch"
+period = "weekly"
+amount = "$100"
+`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,8 +68,12 @@ func TestEstimateWeekly(t *testing.T) {
 }
 
 func TestEstimateMonthlyWithSaturdays(t *testing.T) {
-	bs, err := Parse([]byte(`budgets:
-  - {title: Cloud, period: monthly, days: [Mon, Sat], amount: "800 credits"}`))
+	bs, err := Parse([]byte(`[[budgets]]
+title = "Cloud"
+period = "monthly"
+days = ["Mon", "Sat"]
+amount = "800 credits"
+`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,10 +105,13 @@ func TestBounds(t *testing.T) {
 
 func TestParseErrors(t *testing.T) {
 	for _, bad := range []string{
-		"budgets:\n  - {period: weekly, amount: $5}",
-		"budgets:\n  - {title: x, period: daily, amount: $5}",
-		"budgets:\n  - {title: x, period: weekly, amount: $5, days: [Funday]}",
-		"budgets:\n  - {title: x, period: weekly, amount: lots}",
+		"[[budgets]]\nperiod = \"weekly\"\namount = \"$5\"",
+		"[[budgets]]\ntitle = \"x\"\nperiod = \"daily\"\namount = \"$5\"",
+		"[[budgets]]\ntitle = \"x\"\nperiod = \"weekly\"\namount = \"$5\"\ndays = [\"Funday\"]",
+		"[[budgets]]\ntitle = \"x\"\nperiod = \"weekly\"\namount = \"lots\"",
+		"[[budgets]]\ntitle = \"x\"\nperiod = \"weekly\"",
+		"[[budgets]]\ntitle = \"x\"\nperiod = \"weekly\"\namount = \"$5\"\nperod = \"typo\"",
+		"[[budgets]\n",
 	} {
 		if _, err := Parse([]byte(bad)); err == nil {
 			t.Errorf("expected error for %q", bad)
@@ -109,11 +119,21 @@ func TestParseErrors(t *testing.T) {
 	}
 }
 
+func TestParseNumericAmount(t *testing.T) {
+	bs, err := Parse([]byte("[[budgets]]\ntitle = \"x\"\nperiod = \"weekly\"\namount = 250\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bs[0].Amount.Value != 250 || bs[0].Amount.Prefix != "" || bs[0].Amount.Suffix != "" {
+		t.Errorf("got %+v", bs[0].Amount)
+	}
+}
+
 func TestSameFolder(t *testing.T) {
-	if !SameFolder("/a/b/budgets.yaml", "/a/b/../b/other.yaml") {
+	if !SameFolder("/a/b/budgets.toml", "/a/b/../b/other.toml") {
 		t.Error("expected the same folder")
 	}
-	if SameFolder("/a/b/budgets.yaml", "/a/c/budgets.yaml") {
+	if SameFolder("/a/b/budgets.toml", "/a/c/budgets.toml") {
 		t.Error("expected different folders")
 	}
 }
