@@ -10,6 +10,7 @@ Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top sect
 ### Added
 
 - `just test` runs the unit tests, `go vet`, golangci-lint and a gofmt check (without reformatting), and CI uses it.
+- The widget refreshes itself once an hour, on the hour, so it can be left running overnight.
 - `just install-deps` installs golangci-lint v2 if it is missing.
 
 ## v0.1.0, First release 2026-10-01

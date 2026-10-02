@@ -39,7 +39,10 @@ func main() {
 	w := a.NewWindow("So far, so good")
 
 	lines := container.NewVBox()
-	render := func() {
+	// The hour in which the budgets were last rendered, used to refresh automatically.
+	var renderedHour time.Time
+	render := func(fit bool) {
+		renderedHour = hourStart(time.Now())
 		lines.Objects = nil
 		budgets, err := budget.Load(*path)
 		switch {
@@ -54,7 +57,11 @@ func main() {
 			}
 		}
 		lines.Refresh()
-		w.Resize(fyne.NewSize(w.Content().MinSize().Width, w.Content().MinSize().Height))
+		// Only fit the window to the content on request, so that an automatic refresh does not
+		// undo a window size chosen by the user.
+		if fit {
+			w.Resize(fyne.NewSize(w.Content().MinSize().Width, w.Content().MinSize().Height))
+		}
 	}
 
 	// The default location is only worth mentioning if the file in use is somewhere else.
@@ -90,10 +97,28 @@ func main() {
 		body.Refresh()
 		w.Resize(fyne.NewSize(max(w.Content().MinSize().Width, 360), w.Content().MinSize().Height))
 	})
-	refresh := widget.NewButton("Refresh", render)
+	refresh := widget.NewButton("Refresh", func() { render(true) })
 	dismiss := widget.NewButton("Dismiss", a.Quit)
 	w.SetContent(container.NewVBox(body, container.NewGridWithColumns(3, refresh, infoBtn, dismiss)))
-	render()
+	render(true)
+
+	// Refresh once an hour, on the hour, so a window left open overnight stays up to date. Checking every
+	// minute rather than sleeping for an hour keeps this right after the computer wakes from sleep.
+	go func() {
+		for range time.Tick(time.Minute) {
+			fyne.Do(func() {
+				if hourStart(time.Now()) != renderedHour {
+					render(false)
+				}
+			})
+		}
+	}()
+
 	w.SetFixedSize(false)
 	w.ShowAndRun()
+}
+
+// hourStart returns the start of the local hour containing t.
+func hourStart(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, t.Location())
 }
