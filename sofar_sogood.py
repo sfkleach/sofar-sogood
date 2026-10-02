@@ -5,7 +5,7 @@ This is a console version of the So far, so good widget, for machines where the
 widget cannot run (for example, where OpenGL is unavailable). It uses only the
 Python standard library and reads the same configuration file as the widget.
 
-Usage: sofar_sogood.py [--config PATH] [--date YYYY-MM-DD] [--version]
+Usage: sofar_sogood.py [--config PATH] [--date YYYY-MM-DD] [--info] [--version]
 
 The configuration file is TOML, read with the standard library's tomllib, so Python 3.11 or later is needed:
 
@@ -21,6 +21,7 @@ import datetime
 import os
 import re
 import sys
+import textwrap
 
 try:
     import tomllib
@@ -216,14 +217,47 @@ def report(budgets, today, path):
     return "\n".join(out)
 
 
+def same_folder(a, b):
+    """Return True if two file paths are in the same folder."""
+    return os.path.dirname(os.path.abspath(a)) == os.path.dirname(os.path.abspath(b))
+
+
+def info_text(path):
+    """Return the same explanation that the widget shows in its Info pane."""
+    default = default_config_path()
+    def wrap(text):
+        """Wrap prose to fit a console; the paths below are deliberately left unwrapped."""
+        return textwrap.fill(text, 78)
+
+    paragraphs = [
+        wrap("So far, so good helps you track AI credit usage against a budget."),
+        wrap("Each budget shows how much you should have used by the close of play today, spreading the renewal "
+             "amount evenly over the working days of the period."),
+        "Budgets are defined in this config file:\n%s" % path,
+    ]
+    # The default location is only worth mentioning if the file in use is somewhere else.
+    if not same_folder(path, default):
+        paragraphs.append("The default config file is:\n%s" % default)
+    paragraphs += [
+        wrap('Each amount is a number with an optional symbol or unit, such as "$200", "£1,000" or "800 credits".'),
+        "(Pass --config PATH to use a different file.)",
+        "Version: %s" % VERSION,
+    ]
+    return "\n\n".join(paragraphs)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Print a text report of budget spend to date.")
     parser.add_argument("--config", help="path to budgets.toml (default: the user config directory)")
     parser.add_argument("--date", help="report as at this date, YYYY-MM-DD (default: today)")
+    parser.add_argument("--info", action="store_true", help="explain what this does, and where the config file is")
     parser.add_argument("--version", action="version", version=VERSION)
     args = parser.parse_args(argv)
 
     path = args.config or default_config_path()
+    if args.info:
+        print(info_text(path))
+        return 0
     try:
         today = datetime.date.fromisoformat(args.date) if args.date else datetime.date.today()
         budgets = load_budgets(path)
