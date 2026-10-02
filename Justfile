@@ -16,7 +16,7 @@ build:
 
 # Build and run, optionally with a config file: just run examples/budgets.toml
 run config="": build
-    ./sofar-sogood {{ if config != "" { "-config " + config } else { "" } }}
+    ./sofar-sogood {{ if config != "" { "--config " + config } else { "" } }}
 
 # Run the unit tests
 unittest:

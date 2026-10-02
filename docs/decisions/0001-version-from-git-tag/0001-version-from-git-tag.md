@@ -1,7 +1,7 @@
 # 0001 - Version from git tag, 2026-10-01
 
 ## Issue
-The widget needs a version number that is shown in the Info pane and by `-version`, and that matches the release
+The widget needs a version number that is shown in the Info pane and by `--version`, and that matches the release
 tag. We need to decide where the version is stored.
 
 ## Factors

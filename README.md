@@ -9,7 +9,7 @@ Friday). For each budget it shows one line: how much you should have used by the
 renewal amount evenly over the working days of the period.
 
 The config file lives in your user config directory, for example `~/.config/sofar-sogood/budgets.toml` on Linux, or
-anywhere you like via `-config`. See [examples/budgets.toml](examples/budgets.toml) and
+anywhere you like via `--config`. See [examples/budgets.toml](examples/budgets.toml) and
 [docs/specs/amount-format.md](docs/specs/amount-format.md). To build it you need Go and a C compiler (it uses
 [Fyne](https://fyne.io)); run `just build`, or `just run examples/budgets.toml` to try it out.
 

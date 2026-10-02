@@ -3,15 +3,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
+	"os"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/spf13/cobra"
 
 	"github.com/sfkleach/sofar-sogood/budget"
 )
@@ -20,16 +20,30 @@ import (
 var version = "dev"
 
 func main() {
-	path := flag.String("config", "", "path to budgets.toml (default: user config dir)")
-	showVersion := flag.Bool("version", false, "print the version and exit")
-	flag.Parse()
-	if *showVersion {
-		fmt.Println(version)
-		return
+	var configPath string
+	cmd := &cobra.Command{
+		Use:          "sofar-sogood",
+		Short:        "Show how much of each budget should have been spent by today",
+		Args:         cobra.NoArgs,
+		Version:      version,
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(configPath)
+		},
 	}
+	cmd.SetVersionTemplate("{{.Version}}\n")
+	cmd.Flags().StringVar(&configPath, "config", "", "path to budgets.toml (default: user config dir)")
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
+}
+
+// run shows the widget and returns when it is dismissed.
+func run(configPath string) error {
+	path := &configPath
 	defaultPath, err := budget.DefaultPath()
 	if err != nil && *path == "" {
-		log.Fatal(err)
+		return err
 	}
 	if *path == "" {
 		*path = defaultPath
@@ -78,7 +92,7 @@ func main() {
 			"%s"+
 			"Each amount is a number with an optional symbol or unit, "+
 			"such as \"$200\", \"£1,000\" or \"800 credits\".\n\n"+
-			"(Pass -config <path> to use a different file.)\n\n"+
+			"(Pass --config <path> to use a different file.)\n\n"+
 			"Version: %s", *path, defaultNote, version))
 	info.Wrapping = fyne.TextWrapWord
 
@@ -116,6 +130,7 @@ func main() {
 
 	w.SetFixedSize(false)
 	w.ShowAndRun()
+	return nil
 }
 
 // hourStart returns the start of the local hour containing t.
