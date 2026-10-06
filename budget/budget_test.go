@@ -83,7 +83,7 @@ amount = "800 credits"
 	if e.DaysTotal != 9 || e.DaysElapsed != 3 {
 		t.Fatalf("got %+v", e)
 	}
-	if got, want := e.Line(), "Cloud: 266.67 credits of 800 credits (3/9 days)"; got != want {
+	if got, want := e.Line(), "Cloud: 266.67 credits of 800 credits (3/9 days, 33%)"; got != want {
 		t.Errorf("got %q want %q", got, want)
 	}
 }

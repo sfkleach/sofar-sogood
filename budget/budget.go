@@ -137,9 +137,13 @@ func (b Budget) Estimate(now time.Time) Estimate {
 
 // Line renders the estimate as a single line of text.
 func (e Estimate) Line() string {
-	return fmt.Sprintf("%s: %s of %s (%d/%d days)",
+	percent := 0.0
+	if e.Budget.Amount.Value > 0 {
+		percent = e.Spent / e.Budget.Amount.Value * 100
+	}
+	return fmt.Sprintf("%s: %s of %s (%d/%d days, %.0f%%)",
 		e.Budget.Title,
 		e.Budget.Amount.Format(e.Spent),
 		e.Budget.Amount.Format(e.Budget.Amount.Value),
-		e.DaysElapsed, e.DaysTotal)
+		e.DaysElapsed, e.DaysTotal, percent)
 }

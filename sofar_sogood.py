@@ -209,8 +209,9 @@ def report(budgets, today, path):
     rows = []
     for b in budgets:
         spent, elapsed, total = b.estimate(today)
+        percent = spent / b.amount.value * 100 if b.amount.value else 0.0
         rows.append((b.title, "%s of %s" % (b.amount.format(spent), b.amount.format(b.amount.value)),
-                     "(%d/%d days)" % (elapsed, total)))
+                     "(%d/%d days, %.0f%%)" % (elapsed, total, percent)))
     widths = [max(len(row[col]) for row in rows) for col in range(3)]
     for title, spend, days in rows:
         out.append("%s  %s  %s" % (title.ljust(widths[0]), spend.ljust(widths[1]), days))
