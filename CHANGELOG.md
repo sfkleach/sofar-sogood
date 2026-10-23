@@ -5,7 +5,7 @@ Following the style in https://keepachangelog.com/en/1.0.0/
 Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top section must be a release heading, not
 `Unreleased`, before a tag is pushed; `just shippable` checks this.
 
-## v0.2.0, TOML config 2026-10-02
+## v0.2.0, TOML config 2026-10-23
 
 ### Changed
 
@@ -17,6 +17,9 @@ Release headings take the form `## vX.Y.Z, Short title YYYY-MM-DD`. The top sect
 - **Breaking:** command-line options now use the GNU style, with double dashes: `--config` and `--version`, and
   `-v` for short. The old single-dash `-config` and `-version` are no longer accepted. The options are handled by
   Cobra, which also provides `--help`.
+- The widget and the console report now also show the percentage of the budget consumed.
+- Built with Go 1.26.10, which fixes CVE-2026-111943 (`crypto/x509` trusted chains through compromised eMudhra
+  intermediate CA keys).
 
 ### Added
 
